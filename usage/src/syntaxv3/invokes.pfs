@@ -1,0 +1,8 @@
+composed class Thomas {
+    constructor() {
+    }
+
+    invoked onUpdate() {
+        console.log("Hello");
+    }
+}

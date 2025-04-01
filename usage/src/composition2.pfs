@@ -1,0 +1,62 @@
+composed class User {
+    constructor(property String name, property String email) {
+    }
+
+    function getFieldsForSerialisation() {
+        return {
+            next ? ...next : ...{},
+            name: this.name, email: this.email
+        }
+    }
+}
+
+composed class AdminUser {
+    constructor(property String permissionLevel) {
+    }
+
+    function getFieldsForSerialisation() {
+        return {
+            next ? ...next : ...{},
+            permissionLevel: this.permissionLevel
+        };
+    }
+}
+
+composed class FileWriter {
+    constructor(property String targetFile) {
+    }
+
+    function write() {
+        var content = comp.getTextForFileOutput();
+        fs.mkdirSync(path.dirname(this.targetFile), { recursive: true });
+        fs.writeFileSync(this.targetFile, content);
+    }
+
+    function read() {
+        var content = fs.readFileSync(this.targetFile, 'utf8');
+        comp.read(content);
+    }
+
+    expect getTextForFileOutput();
+}
+
+composed class CSVCodec {
+    function write() {
+        var fields = comp.getFieldsForSerialisation();
+        var values = [];
+        for (var key in fields) {
+            values.push(fields[key]);
+        }
+        return values.join(",");
+    }
+    function read(String content) {
+        var fields = comp.getFieldsForSerialisation();
+        var values = content.split(",");
+        var i = 0;
+        for (var key in fields) {
+            comp[key] = values[i];
+            i++
+        }
+    }
+    expect getFieldsForSerialisation();
+}

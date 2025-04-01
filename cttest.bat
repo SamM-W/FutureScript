@@ -1,0 +1,1 @@
+./c.bat ./usage/src/syntaxv3/tokentest.js ./usage/build/test.js
