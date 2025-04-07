@@ -14,8 +14,8 @@ export class Token {
 
     toString() {
         return `Token:${TokenNames[this.type]}{${this.content ? '\"' + this.content + '\"' : this.content}, `+
-        `${this.context ? '\"' + FlagNames[this.content] + '\"' : this.context}, `+
-        `[${this.inner.length != 0 ? ('\n' + this.inner.join(",\n")).replaceAll("\n", "\n   ") + '\n' : ''}]}`;
+        `${this.context ? '\"' + FlagNames[this.context] + '\"' : this.context}, `+
+        `[${this.inner.length != 0 ? ('\n' + this.inner.join(",\n")).replaceAll("\n", "\n:   ") + '\n' : ''}]}`;
     }
 }
 
@@ -45,7 +45,10 @@ export class TokensBuilder {
 
     hasParseFlag(context) {
         if (this.tokenNestStack.length == 0) return false;
-        return this.tokenNestStack[this.tokenNestStack.length-1].context == context;
+        for (var i = this.tokenNestStack.length-1; i >= 0; i--) {
+            if (this.tokenNestStack[i].context == context) return true;
+        }
+        return false;
     }
 
     in() {
@@ -81,6 +84,15 @@ export class TokensBuilder {
             this.remainingText = trimStartSpace(this.remainingText.substring(content.length))
     }
 
+    optionalDirectFlaggedToken(flagType, tokenType, regex, handler) {
+        if (this.tokenNestStack.length != 0 && this.tokenNestStack[this.tokenNestStack.length-1].context == flagType) {
+            return this.optionalToken(tokenType, regex, handler);
+        } else {
+            return this.nonConsumedOptionalToken();
+        }
+    }
+
+
     optionalFlaggedToken(flagType, tokenType, regex, handler) {
         if (this.hasParseFlag(flagType)) {
             return this.optionalToken(tokenType, regex, handler);
@@ -107,6 +119,8 @@ export class TokensBuilder {
                 {return this.optionalToken(tokenType, regex, handler);},
             elseOptionalFlaggedToken: (flagType, tokenType, regex, handler) =>
                 {return this.optionalFlaggedToken(flagType, tokenType, regex, handler);},
+            elseOptionalDirectFlaggedToken: (flagType, tokenType, regex, handler) =>
+                {return this.optionalDirectFlaggedToken(flagType, tokenType, regex, handler);},
             elseThrow: (err) => {
                 for (var token of this.tokens) {
                     console.log(token.toString() + '\n');
@@ -125,6 +139,8 @@ export class TokensBuilder {
             elseOptionalToken: (tokenType, regex, handler) =>
                 {return emptyOptional;},
             elseOptionalFlaggedToken: (flagType, tokenType, regex, handler) =>
+                {return emptyOptional;},
+            elseOptionalDirectFlaggedToken: (flagType, tokenType, regex, handler) =>
                 {return emptyOptional;},
             elseThrow: (err) => {
             },

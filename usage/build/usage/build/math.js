@@ -1,0 +1,1 @@
+console.log('السلام عليكم') ; var x =  1 ; console . log ( x ) ; var y =  1 ; console . log ( y ) ; var generated =  0 ; while ( generated < 23 ) { var next =  x + y ; x =  y ; y =  next ; console . log ( next ) ; generated ++ ; } ;

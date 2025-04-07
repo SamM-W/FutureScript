@@ -8,10 +8,11 @@ export const TokenType = {
     VAR_DEF: nextEnum(),
     VAR_NAME: nextEnum(),
     VAR_EQUALS: nextEnum(),
-    VAR_ASSIGN: nextEnum(),
+    VAR_ACCESS: nextEnum(),
     VAR_ASSIGN_EQUALS: nextEnum(),
 
     VAR_VALUE: nextEnum(),
+    TYPED_NUMBER: nextEnum(),
 
     FUNCTION_INVOKE: nextEnum(),
     FUNCTION_OPEN_BRACKETS: nextEnum(),
@@ -21,22 +22,41 @@ export const TokenType = {
     FUNCTION_INVOKE_NEXT_ARGUMENT: nextEnum(),
     FUNCTION_RETURN: nextEnum(),
     FUNCTION_DEFINITION: nextEnum(),
+
+    THROW: nextEnum(),
     
     LAMBDA_FUNCTION_HEADER: nextEnum(),
 
     VAR_PROPERTY: nextEnum(),
 
-    FUNCTION_OPEN_BLOCK: nextEnum(),
-    FUNCTION_CLOSE_BLOCK: nextEnum(),
+    CONTROL_BLOCK_OPEN_BRACKETS: nextEnum(),
+    CONTROL_BLOCK_CLOSE_BRACKETS: nextEnum(),
+
+    OPEN_CODE_BLOCK: nextEnum(),
+    CLOSE_CODE_BLOCK: nextEnum(),
+    
+    CONTROL_BLOCK_IF: nextEnum(),
+    CONTROL_BLOCK_FOR: nextEnum(),
+    CONTROL_BLOCK_WHILE: nextEnum(),
+    
+    CONTROL_BLOCK_FOR_ITTERATION_TYPE: nextEnum(),
+
     FUNCTION_DECLARATION: nextEnum(),
-    CLASS_DECLARATION: nextEnum(),
+    CLASS_DEFINITION: nextEnum(),
     CLASS_DEFINITION_END: nextEnum(),
 
     ARRAY_OPEN_BRACKETS: nextEnum(),
     ARRAY_CLOSE_BRACKETS: nextEnum(),
     ARRAY_NEXT_VALUE: nextEnum(),
+    
+    MAP_OPEN_BRACKETS: nextEnum(),
+    MAP_CLOSE_BRACKETS: nextEnum(),
+    MAP_NEXT_VALUE: nextEnum(),
+    MAP_ENTRY_TOKEN: nextEnum(),
+    MAP_ASSIGNMENT: nextEnum(),
 
     ARGUMENT_VALUE: nextEnum(),
+    SPACE: nextEnum(),
 
     LITERAL_STRING: nextEnum(),
     LITERAL_NUMBER: nextEnum(),
@@ -48,11 +68,17 @@ export const TokenType = {
     DOUBLE_OPERATOR: nextEnum(),
     NEGATIVE: nextEnum(),
     TYPEOF: nextEnum(),
+    INSTANCEOF: nextEnum(),
+    OBJECT_EXPANSION: nextEnum(),
 
     VAR_INDEX_OPEN_BRACKETS: nextEnum(),
     VAR_INDEX_CLOSE_BRACKETS: nextEnum(),
 
     INSTRUCTION_BREAK: nextEnum(),
+    VAR_CHANGE_BY_ONE: nextEnum(),
+    INLINE_IF_TRUE: nextEnum(),
+    INLINE_IF_FALSE: nextEnum(),
+    ASALAM_OLEKUM: nextEnum(),
 };
 
 export const TokenNames = {};
@@ -62,6 +88,10 @@ for (var key in TokenType) {
 
 enumId = 0;
 export const FlagType = {
+    IN_ENHANCED_FOR_DEFINITION: nextEnum(),
+    IN_NUMERICAL_FOR_DEFINITION: nextEnum(),
+
+    IN_ITTERATION_DEFINITION: nextEnum(),
     IN_FUNCTION_DEFINITION: nextEnum(),
     IN_CLASS_DEFINITION: nextEnum(),
 };

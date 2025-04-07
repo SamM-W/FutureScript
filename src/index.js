@@ -1,13 +1,16 @@
-import { buildFile } from "./build.js";
-import { parseV2 } from "./parserv2/parserv2.js";
+import { compile } from "./compiler.js";
 import fs from "fs";
 import tk from "terminal-kit";
 import process from "process";
 
+var hasOutput = process.argv.indexOf("-noout") === -1;
+
 const term = tk.terminal;
 var startTime = Date.now();
-term.grey("⎲ ");
-term.white("Starting compiler");
+if (hasOutput) {
+    term.grey("⎲ ");
+    term.white("Starting compiler");
+}
 
 var srcFileLocation = process.argv[2];
 var buildFileLocation = "./usage/build/" + process.argv[3];
@@ -21,9 +24,10 @@ for (var entry of compilerInfoRaw) {
     compilerInfo[key] = value;
 }
 
-term.white(": ")
-term.bold.blue(compilerInfo.version + "\n");
-
+if (hasOutput) {
+    term.white(": ")
+    term.bold.blue(compilerInfo.version + "\n");
+}
 // buildFile(srcFileLocation, buildFileLocation, compilerInfo, term).then(() => {
 //     term.grey("⎳ ");
 //     term.green("✅ Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");
@@ -36,7 +40,8 @@ term.bold.blue(compilerInfo.version + "\n");
 //     process.exit(-1);
 // });
 
-parseV2(srcFileLocation, buildFileLocation, compilerInfo, term).then(() => {
+compile(srcFileLocation, buildFileLocation, compilerInfo, term, hasOutput).then(() => {
+    if (!hasOutput) return;
     term.grey("⎳ ");
     term.green("✅ Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");
 }, (err) => {
