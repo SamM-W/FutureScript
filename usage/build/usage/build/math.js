@@ -1,1 +1,2 @@
-console.log('السلام عليكم') ; var x =  1 ; console . log ( x ) ; var y =  1 ; console . log ( y ) ; var generated =  0 ; while ( generated < 23 ) { var next =  x + y ; x =  y ; y =  next ; console . log ( next ) ; generated ++ ; } ;
+//Compiled by the compiler which compiled this file
+import { validateIsOf } from "file://C:\\Gists\\EPQ-FutureProgrammingLanguages\\NewLang\\usage\\pjs-lib\\Types.js";var x =  validateIsOf ( 2 , "number" ) ; var y =  validateIsOf ( 2 , "string" ) ; var z =  validateIsOf ( null , "number" ) ; z =  x + y ; console . log ( x , y , z ) ;

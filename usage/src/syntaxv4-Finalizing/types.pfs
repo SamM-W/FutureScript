@@ -1,0 +1,8 @@
+number x = 2;
+string y = 2;
+
+number z = null;
+
+z = x + y;
+
+console.log(x, y, z);

@@ -209,17 +209,16 @@ function tokenizeInstruction(tkzr) {
     }
     tkzr
         //Variable def
-        .optionalToken(TokenType.VAR_DEF, /^(var|const|let)[\s]+/, () => {
+        .optionalToken(TokenType.VAR_DEF, /^([a-zA-Z0-9_$]+)[\s]+(?=([a-zA-Z0-9_$]+\s*\=))/, () => {
             tkzr.in()
-                .token(TokenType.VAR_NAME, /^[_a-zA-Z0-9$]+[\s]+/)
-                .token(TokenType.VAR_EQUALS, /^=[\s]+/)
+                .token(TokenType.VAR_NAME, /^[_a-zA-Z0-9$]+\s*/)
+                .token(TokenType.VAR_EQUALS, /^=\s*/)
                 .metaToken(TokenType.ARGUMENT_VALUE)
                 .in();
             tokenizeValue(tkzr);
             tkzr.out()
                 .out();
         })
-        .elseOptionalToken(TokenType.ASALAM_OLEKUM, /^ٱلسَّلَامُ عَلَيْكُمْ\s*/)
         //Itteration and selection
         .elseOptionalToken(TokenType.CONTROL_BLOCK_IF, /^if\s*(?=\()/, () => {
             tkzr.in()

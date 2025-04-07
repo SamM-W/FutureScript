@@ -12,8 +12,8 @@ if "%command%" == "exit" (
     cls
     exit /b 0
 )
-if /i "%command%"=="node math.js" (
-    set "command=call ./car ./usage/src/math.js ./usage/build/math.js -noout"
+if /i "%command%"=="r" (
+    set "command=call ./car ./usage/src/syntaxv4-Finalizing/types.pfs ./usage/build/math.js"
 ) else (
     set "command=call %command%"
 )

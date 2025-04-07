@@ -28,17 +28,6 @@ if (hasOutput) {
     term.white(": ")
     term.bold.blue(compilerInfo.version + "\n");
 }
-// buildFile(srcFileLocation, buildFileLocation, compilerInfo, term).then(() => {
-//     term.grey("⎳ ");
-//     term.green("✅ Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");
-// }, (err) => {
-//     term.grey("⎳ ")
-//     term.red("Failed compile in " + (Date.now() - startTime) + "ms\n");
-//     term.red("Error:\n");
-
-//     console.error(err);
-//     process.exit(-1);
-// });
 
 compile(srcFileLocation, buildFileLocation, compilerInfo, term, hasOutput).then(() => {
     if (!hasOutput) return;

@@ -2,12 +2,16 @@ import path from "path";
 import fs from "fs";
 import { tokenize } from "./token/tokenizer.js";
 import { TokenType } from "./token/tokentypes.js";
-import { applySubstitutionToTransform } from "./transform/transformer.js";
+import { applySimpleTransformToToken } from "./transform/transformer.js";
+
+const compiledResultHeader =
+`//Compiled by the compiler which compiled this file
+import { validateIsOf } from "file://C:\\\\Gists\\\\EPQ-FutureProgrammingLanguages\\\\NewLang\\\\usage\\\\pjs-lib\\\\Types.js";`;
 
 function compileTokens(tokens) {
     var result = [];
     for (var token of tokens) {
-        applySubstitutionToTransform(token);
+        applySimpleTransformToToken(token);
         result.push(token.content || "");
         if (token.inner) {
             result = [...result, ...compileTokens(token.inner)];
@@ -21,7 +25,7 @@ export async function compile(inFileName, outFileName, compilerInfo, term, hasOu
     var tokenized = tokenize(inText);
     if (hasOutput) term.grey("| ").white("📖 Parsed file ").green("successfully\n");
 
-    var out = compileTokens(tokenized).join(" ");
+    var out = compiledResultHeader + compileTokens(tokenized).join(" ");
     fs.mkdirSync(path.dirname(outFileName), { recursive: true });
     fs.writeFileSync(outFileName, out);
 }
