@@ -2,6 +2,7 @@ import { compile } from "./compiler.js";
 import fs from "fs";
 import tk from "terminal-kit";
 import process from "process";
+import { getReviewOfCode } from "./review/generator.js";
 
 var hasOutput = process.argv.indexOf("-noout") === -1;
 
@@ -29,7 +30,8 @@ if (hasOutput) {
     term.bold.blue(compilerInfo.version + "\n");
 }
 
-compile(srcFileLocation, buildFileLocation, compilerInfo, term, hasOutput).then(() => {
+var hasReview = process.argv.indexOf("-noreview") === -1;
+compile(srcFileLocation, buildFileLocation, compilerInfo, term, hasOutput, hasReview).then(() => {
     if (!hasOutput) return;
     term.grey("⎳ ");
     term.green("✅ Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");

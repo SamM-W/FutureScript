@@ -8,7 +8,7 @@ import { openrouter } from '@openrouter/ai-sdk-provider';
 import { generateObject } from 'ai';
 
 //TODO: hide
-process.env.OPENROUTER_API_KEY = "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";
+process.env.OPENROUTER_API_KEY = "sk-or-v1-d2bd53b19f1123448a61d1ecdf033c7b429e12322d4fc4db5aad1ffb2b608e48a88";
 
 function readCacheFromFile() {
     generationsCache = JSON.parse(fs.readFileSync("./generation_cache.json")).generated;

@@ -19,9 +19,11 @@ export const TokenType = {
     FUNCTION_CLOSE_BRACKETS: nextEnum(),
     FUNCTION_DEFINE_NEXT_ARGUMENT: nextEnum(),
     FUNCTION_ARGUMENT_NAME: nextEnum(),
+    FUNCTION_ARGUMENT_TYPE: nextEnum(),
     FUNCTION_INVOKE_NEXT_ARGUMENT: nextEnum(),
     FUNCTION_RETURN: nextEnum(),
     FUNCTION_DEFINITION: nextEnum(),
+    CONSTRUCTOR_FUNCTION_DEFINITION: nextEnum(),
 
     THROW: nextEnum(),
     
@@ -44,6 +46,8 @@ export const TokenType = {
     FUNCTION_DECLARATION: nextEnum(),
     CLASS_DEFINITION: nextEnum(),
     CLASS_DEFINITION_END: nextEnum(),
+
+    CLASS_CONSTRUCTOR_PROPERTY: nextEnum(),
 
     ARRAY_OPEN_BRACKETS: nextEnum(),
     ARRAY_CLOSE_BRACKETS: nextEnum(),
@@ -78,7 +82,9 @@ export const TokenType = {
     VAR_CHANGE_BY_ONE: nextEnum(),
     INLINE_IF_TRUE: nextEnum(),
     INLINE_IF_FALSE: nextEnum(),
-    ASALAM_OLEKUM: nextEnum(),
+    INLINE_NULL_CHECK: nextEnum(),
+    CONSTRUCTOR_INVOKE: nextEnum(),
+    CODE_INJECT: nextEnum(), //Used by the transformer to inject code into the result
 };
 
 export const TokenNames = {};
@@ -94,6 +100,8 @@ export const FlagType = {
     IN_ITTERATION_DEFINITION: nextEnum(),
     IN_FUNCTION_DEFINITION: nextEnum(),
     IN_CLASS_DEFINITION: nextEnum(),
+    IN_COMPOSED_CLASS_DEFINITION: nextEnum(),
+    IN_TRAIT_DEFINITION: nextEnum(),
 };
 
 

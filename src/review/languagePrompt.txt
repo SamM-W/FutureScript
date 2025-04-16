@@ -1,0 +1,36 @@
+A description of FutureScript:
+```futurescript
+composed class Foo {
+    constructor(
+        property string name, //Properties are shorthand for adding a this.name = name; in the constructor
+        property number age //Arguments can also be annotated witha  type which it checks
+    ) {
+    }
+
+    base exampleBaseFunction(string genericArgument) { //Base functions can be overriden by apply traits
+        return false;
+    }
+
+    base procedure logAll() { //Procedures will run in parralel with all traits, but have no return value
+        console.log("Logging from Foo");
+    }
+}
+
+trait Bar {
+    constructor(
+    ) {
+        this.barTrait = "hello from bar";
+    }
+
+    apply canAccessStorefront(string genericArgument) {
+        console.log(this.barTrait); // -> "hello from bar"
+        return genericArgument == 2 || next; //next means to get the value of the method being overriden
+    }
+
+    apply procedure logAll() { //Applied WITH the base function, there is no override
+        console.log("Logging from Bar");
+    }
+}
+
+new Foo("Person Surname", 2).addTrait(new Bar()); //Traits are added as so
+```

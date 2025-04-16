@@ -67,21 +67,20 @@ export class TokensBuilder {
     }
 
     addTokenWithoutCapture(tokenType, content) {
+        var newToken = new Token(tokenType, content);
         if (this.tokenNestStack.length == 0) {
-            this.tokens.push(new Token(
-                tokenType, content
-            ));
+            this.tokens.push(newToken);
         } else {
-            this.tokenNestStack[this.tokenNestStack.length-1].addInner(new Token(
-                tokenType, content
-            ));
+            this.tokenNestStack[this.tokenNestStack.length-1].addInner(newToken);
         }
+        return newToken;
     }
 
     addToken(tokenType, content) {
-        this.addTokenWithoutCapture(tokenType, content);
+        var token = this.addTokenWithoutCapture(tokenType, content);
         if (content != null)
-            this.remainingText = trimStartSpace(this.remainingText.substring(content.length))
+            this.remainingText = trimStartSpace(this.remainingText.substring(content.length));
+        return token;
     }
 
     optionalDirectFlaggedToken(flagType, tokenType, regex, handler) {
@@ -104,9 +103,9 @@ export class TokensBuilder {
     optionalToken(tokenType, regex, handler) {
         var result = regex.exec(this.remainingText);
         if (result != null) {
-            this.addToken(tokenType, result[0]);
+            var token = this.addToken(tokenType, result[0]);
             this.lastOptional = true;
-            if (handler) handler()
+            if (handler) handler(token)
             return this.consumedOptionalToken()
         }
         return this.nonConsumedOptionalToken();

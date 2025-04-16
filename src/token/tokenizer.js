@@ -40,6 +40,9 @@ function parseVarValueAdditional(tkzr) {
             .out()
     }
 
+    var isInNullCheck = tkzr.optionalToken(TokenType.INLINE_NULL_CHECK, /^\?.\s*/)
+    .didConsume();
+
     if (tkzr.test(/^\([\s]*/)) {
         tkzr.token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
         tkzr.optionalToken(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
@@ -53,6 +56,7 @@ function parseVarValueAdditional(tkzr) {
                 tkzr.out()
                 tkzr.token(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
             });
+        isInNullCheck = false;
     }
     
     if (tkzr.test(/^\[[\s]*/)) {
@@ -60,12 +64,16 @@ function parseVarValueAdditional(tkzr) {
             .in();
         tokenizeValue(tkzr)
         tkzr.token(TokenType.VAR_INDEX_CLOSE_BRACKETS, /^\][\s]*/)
-            .out()
+            .out();
+        isInNullCheck = false;
     }
+    
+    var isInNullCheck = isInNullCheck || tkzr.optionalToken(TokenType.INLINE_NULL_CHECK, /^\?.\s*/)
+        .didConsume();
 
-    if (tkzr.test(/^\.[\s]*/)) {
-        tkzr.token(TokenType.VAR_PROPERTY, /^\.[\s]*/)
-            .token(TokenType.VAR_VALUE, /^[_a-zA-Z0-9$]+[\s]*/)
+    if (tkzr.test(/^\.[\s]*/) || isInNullCheck) {
+        tkzr.optionalToken(TokenType.VAR_PROPERTY, /^\.[\s]*/)
+        tkzr.token(TokenType.VAR_VALUE, /^[_a-zA-Z0-9$]+[\s]*/)
         parseVarValueAdditional(tkzr);
     }
     tkzr.out();
@@ -75,9 +83,9 @@ function tokenizeNonStringValueOrThrow(tkzr) {
     tkzr.optionalToken(TokenType.NEGATIVE, /^\-[\s]*/);
     tkzr.optionalToken(TokenType.TYPEOF, /^typeof[\s]*/);
     tkzr.optionalToken(TokenType.OBJECT_EXPANSION, /^\.\.\.[\s]*/);
-    tkzr
+    tkzr.optionalToken(TokenType.CONSTRUCTOR_INVOKE, /^new[\s]*/);
+    var parseResult = tkzr
         .optionalToken(TokenType.LITERAL_NUMBER, /^[0-9.]+[\s]*/)
-        .elseOptionalToken(TokenType.TYPED_NUMBER, /^((صفر|واحد|اثنان|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|أحد عشر|اثنا عشر|ثلاثة عشر|أربعة عشر|خمسة عشر|ستة عشر|سبعة عشر|ثمانية عشر|تسعة عشر|عشرون|ثلاثون|أربعون|خمسون|ستون|سبعون|ثمانون|تسعون|مائة|ألف|مائتان|ثلاثمائة|أربعمائة|خمسمائة|ستمائة|سبعمائة|ثمانمائة|تسعمائة|ألف واحد|و)( )*)+\s*/)
         .elseOptionalToken(TokenType.LAMBDA_FUNCTION_HEADER, /^\s*\((\s*[_0-9a-zA-Z]+\s*)?(\s*,\s*[_0-9a-zA-Z]+\s*)*\)\s*=>\s*/, () => {
             tkzr.optionalToken(TokenType.OPEN_CODE_BLOCK, /^\{[\s]*/, () => {
                 tkzr.in()
@@ -128,7 +136,8 @@ function tokenizeNonStringValueOrThrow(tkzr) {
                 });
             tkzr.out();
         })
-        .elseThrow("Unknown value");
+    tkzr.optionalToken(TokenType.VAR_PROPERTY, /^\.[\s]*/, () => parseVarValueAdditional(tkzr));
+    parseResult.elseThrow("Unknown value");
 }
 
 function tokenizeOperatorOrInstructionBreak(tkzr) {
@@ -162,18 +171,59 @@ function tokenizeValue(tkzr) {
 }
 
 function tokenizeInstruction(tkzr) {
-    function tokenizeFunctionBody() {
+    function tokenizeConstructorFunctionBody() {
         tkzr.in()
-            .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/);
+            .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
+            .in();
 
         if (!tkzr.test(/^\)/))
             while (true) {
-                tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                tkzr.optionalToken(TokenType.CLASS_CONSTRUCTOR_PROPERTY, /^property[\s]*/);
+
+                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s*)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
+                if (isTypeAnnotated) {
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_TYPE, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                } else {
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                }
+                if (!tkzr.optionalToken(TokenType.FUNCTION_DEFINE_NEXT_ARGUMENT, /^,\s*/).didConsume())
+                    break;
+            }
+
+        tkzr.out().token(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
+            .token(TokenType.OPEN_CODE_BLOCK, /^\{[\s]*/)
+            .in()
+            .addTokenContextFlag(FlagType.IN_FUNCTION_DEFINITION);
+
+        while (!tkzr.test(/^\}[\s]*/)) {
+            tokenizeInstruction(tkzr);
+        }
+
+        tkzr.out()
+            .token(TokenType.CLOSE_CODE_BLOCK, /^\}[\s]*/)
+            .out();
+    }
+
+    function tokenizeFunctionBody() {
+        tkzr.in()
+            .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
+            .in();
+
+        if (!tkzr.test(/^\)/))
+            while (true) {
+                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s*)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
+                if (isTypeAnnotated) {
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_TYPE, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                } else {
+                    tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
+                }
                 if (!tkzr.optionalToken(TokenType.FUNCTION_DEFINE_NEXT_ARGUMENT, /^,/).didConsume())
                     break;
             }
 
-        tkzr.token(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
+        tkzr.out().token(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
             .token(TokenType.OPEN_CODE_BLOCK, /^\{[\s]*/)
             .in()
             .addTokenContextFlag(FlagType.IN_FUNCTION_DEFINITION);
@@ -279,18 +329,25 @@ function tokenizeInstruction(tkzr) {
             tkzr.out()
         })
 
-        .elseOptionalToken(TokenType.FUNCTION_DEFINITION, /^(async)?[\s]*function[\s]+[_a-zA-Z0-9$]*[\s]*(?=\()/, () => {
-            tokenizeFunctionBody();
-        })
+        .elseOptionalToken(TokenType.FUNCTION_DEFINITION, /^(async)?[\s]*function[\s]+[_a-zA-Z0-9$]*[\s]*(?=\()/, tokenizeFunctionBody)
         
-        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s)?\s*[_a-zA-Z0-9$]*\s*(?=\()/, () => {
-            tokenizeFunctionBody();
-        })
+        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor*\s*(?=\()/, tokenizeConstructorFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_TRAIT_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor*\s*(?=\()/, tokenizeConstructorFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor\s*(?=\()/, tokenizeConstructorFunctionBody)
+
+        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((base)\s+(procedure\s+)?)?[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_TRAIT_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((apply)\s+(procedure\s+)?)?[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s)?\s*[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
+
 
         //Class definition
-        .elseOptionalToken(TokenType.CLASS_DEFINITION, /^(export)?[\s]*class[\s]+[_a-zA-Z0-9$]*[\s]*{/, () => {
+        .elseOptionalToken(TokenType.CLASS_DEFINITION, /^(export\s+)?(((composed\s+)?class)|trait)\s+[_a-zA-Z0-9$]*[\s]*{/, (token) => {
+            var isComposed = /^(export\s*)?(composed\s+)/.test(token.content);
+            var isTrait = /^(export)?[\s]*(trait\s+)/.test(token.content);
             tkzr.in()
-                .addTokenContextFlag(FlagType.IN_CLASS_DEFINITION);
+            if (isComposed) tkzr.addTokenContextFlag(FlagType.IN_COMPOSED_CLASS_DEFINITION);
+            else if (isTrait) tkzr.addTokenContextFlag(FlagType.IN_TRAIT_DEFINITION);
+            else tkzr.addTokenContextFlag(FlagType.IN_CLASS_DEFINITION);
 
             while (!tkzr.test(/^\}[\s]*/)) {
                 tokenizeInstruction(tkzr);
@@ -319,33 +376,6 @@ function tokenizeInstruction(tkzr) {
                     .out();
             }
         })
-        // .elseOptionalToken(TokenType.VAR_ASSIGN, /^[_a-zA-Z0-9$]+([\s]*\.[\s]*[_a-zA-Z0-9$]+[\s]*)*[\s]*(?=([\+\-\*\/])?=)/, () => {
-        //     tkzr.in()
-        //         .token(TokenType.VAR_ASSIGN_EQUALS, /^([\+\-\*\/])?=[\s]*/)
-        //         .metaToken(TokenType.ARGUMENT_VALUE)
-        //         .in();
-        //     tokenizeValue(tkzr);
-        //     tkzr.out()
-        //         .out();
-        // })
-        
-        // //Function invoke
-        // .elseOptionalToken(TokenType.FUNCTION_INVOKE, /^[_a-zA-Z0-9$]+([\s]*\.[\s]*[_a-zA-Z0-9$]+[\s]*)*[\s]*(?=\()/, () => {
-        //     tkzr.in()
-        //         .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
-        //     tkzr.optionalToken(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
-        //         .else(() => {
-        //             tkzr.in()
-        //             while (true) {
-        //                 tokenizeValue(tkzr);
-        //                 if (!tkzr.optionalToken(TokenType.FUNCTION_INVOKE_NEXT_ARGUMENT, /^,/).didConsume())
-        //                     break;
-        //             }
-        //             tkzr.out()
-        //             tkzr.token(TokenType.FUNCTION_CLOSE_BRACKETS, /^\)[\s]*/)
-        //         });
-        //     tkzr.out();
-        // })
 
         .elseOptionalToken(TokenType.SPACE, /^\s+/)
         .elseThrow("Unknown identifier of instruction");
@@ -371,9 +401,5 @@ export function tokenize(text) {
         }
         i++;
     }
-
-    // for (var token of tkzr.tokens) {
-    //     console.log(token.toString() + '\n');
-    // }
     return tkzr.tokens;
 }

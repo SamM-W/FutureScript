@@ -13,7 +13,8 @@ if "%command%" == "exit" (
     exit /b 0
 )
 if /i "%command%"=="r" (
-    set "command=call ./car ./usage/src/syntaxv4-Finalizing/types.pfs ./usage/build/math.js"
+    cls
+    set "command=call ./car ./usage/src/syntaxv4-Finalizing/compose.pfs ./usage/build/math.js"
 ) else (
     set "command=call %command%"
 )
