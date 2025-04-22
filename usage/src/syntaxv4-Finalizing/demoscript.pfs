@@ -1,0 +1,135 @@
+//Example source code for 'FutureScript', the // before a line means that it is not code and is a comment
+
+//Syntax changes example:
+
+//Traditional variable definitions are still supported,
+var x = 2;
+//But optional types can be given in order to check the type of the variable being given
+string y = "Hello world!";
+string z = 2; //Casts the number to a string, so it is valid
+//But if the type is not correct, it will throw an error
+//number a = "Hello world!"; //Error: Expected type 'number' but got 'string' in variable definition
+
+//Same goes for functions
+
+// Example of an abstraction, alternative of 'for(var i = 0; i < 5; i++)'
+function hello(string name, number exclamations) {
+    log("Hello " + name + "!".repeat(exclamations));
+}
+
+hello("John", 1); // outputs: Hello John!
+hello(2, 3); // outputs: Hello 2!!!
+hello("Jane"); // Undefined values are permitted, so outputs: Hello Jane
+// hello("Jane", "not a number"); // Error: Expected type 'number' but got 'string' in variable definition
+
+for (var i in range(5))
+    log(i); // outputs: 0 1 2 3 4
+
+//Boolean operators and and or can be used as an alternative to && and || respectively.
+log(true and false or not false); // outputs: false
+//But where it could hurt clarity, the developer can still use the old syntax.
+log(true && false || !false); // outputs: false
+
+//
+
+//Traits and Composition Example:
+
+// This example demonstrates how to use traits and composition in FutureScript.
+// It defines a base class `User` and two traits `AdminPermission` and `StorefrontOwner`.
+// The `User` class can have multiple traits added to it, allowing for flexible permission management utilizing the trait system.
+// The traits can add their own behaviour to methods from the base class, and the order of the application of traits determines the final behavior.
+// The example shows how to create users with different permissions and how to check their access to storefronts.
+
+//Class defines itself as being composed, meaning that it should have the addTrait method and the _traits property, and can define base functions
+composed class User {
+
+    //The constructor is a special function of a class, which is called when the object is created.
+    //Property declarations are a shorthand for the typical this.name = name; syntax.
+    //'string' and 'number' are the types of the properties, and they are checked when the object is created.
+    constructor(
+        property string name,
+        property number age
+    ) {
+    }
+
+    //In order to simplify the composition process, we define a base function where the behaviour can be changed by traits.
+    //This function is not a procedure, so it will return a value, which we define as being false, meaning it cannot access the storefront by default.
+    base canAccessStorefront(string storefrontId) {
+        return false;
+    }
+
+    //Here is a base procedure that is defined in the class, where every implementation of the procedure will be called,
+    base procedure logAllPermissions() {
+        log("Logging user permissions:");
+        //Traits are called at the end of the base function, and they will be called in the order they were added.
+    }
+}
+
+//Here is a trait that defines a set of functions that can be added to the class.
+trait AdminPermission {
+    constructor(
+    ) {
+    }
+
+    //Here it applies into the base function of the class, and it will completley overrider the base function as it never calls 'next'.
+    //This means that the trait will always return true, meaning that the user can access any storefront.
+    apply canAccessStorefront(string storefrontId) {
+        return true;
+    }
+    
+    //This will also log that the admin permission is present when logAllPermissions is called.
+    apply procedure logAllPermissions() {
+        log("Hello from admin permissions.");
+    }
+}
+
+trait StorefrontOwner {
+    //Here the type is not defined, so it can be any value.
+    constructor(
+        property storefrontId
+    ) {
+    }
+
+    //Here it will return true only if the store that is being accessed is the same as the one that the user owns,
+    //Additionally, the 'or next' means that if the next trait in the chain returns true, it will also return true.
+    apply canAccessStorefront(storefrontId) {
+        return this.storefrontId == storefrontId or next;
+    }
+
+    //This will also log that the store owner permission is present when logAllPermissions is called.
+    apply procedure logAllPermissions() {
+        log("Hello from storefont (" + this.storefrontId + ") permissions.");
+    }
+}
+
+//Example usage of the User class and traits
+//Create a new user with a name and age
+User user = new User("John", 30);
+//And give it the trait that it owns a store, with the id 'storefrontId1'.
+user.addTrait(new StorefrontOwner("storefrontId1"));
+
+log(user.canAccessStorefront("storefrontId1")); // outputs: true
+log(user.canAccessStorefront("storefrontId2")); // outputs: false
+
+//Some more usage
+//Like before, the var keyword can be used to not check the type of variable being given
+var user2 = new User("Jane", 25);
+user2.addTrait(new StorefrontOwner("storefrontId2"));
+user2.addTrait(new StorefrontOwner("storefrontId3"));
+
+User userAdmin = new User("Admin", 40);
+userAdmin.addTrait(new AdminPermission());
+
+log(user2.canAccessStorefront("storefrontId1")); // outputs: false
+log(user2.canAccessStorefront("storefrontId2")); // outputs: true
+log(user2.canAccessStorefront("storefrontId3")); // outputs: true
+
+log(userAdmin.canAccessStorefront("storefrontId1")); // outputs: true
+log(userAdmin.canAccessStorefront("storefrontId2")); // outputs: true
+
+user2.logAllPermissions(); //Outputs:
+//Logging user permissions:
+//Hello from storefont (storefrontId2) permissions.
+//Hello from storefont (storefrontId3) permissions.
+
+//

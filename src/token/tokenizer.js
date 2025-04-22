@@ -80,6 +80,7 @@ function parseVarValueAdditional(tkzr) {
 }
 
 function tokenizeNonStringValueOrThrow(tkzr) {
+    tkzr.optionalToken(TokenType.NOT, /^(\!|not)[\s]*/);
     tkzr.optionalToken(TokenType.NEGATIVE, /^\-[\s]*/);
     tkzr.optionalToken(TokenType.TYPEOF, /^typeof[\s]*/);
     tkzr.optionalToken(TokenType.OBJECT_EXPANSION, /^\.\.\.[\s]*/);
@@ -136,7 +137,6 @@ function tokenizeNonStringValueOrThrow(tkzr) {
                 });
             tkzr.out();
         })
-    tkzr.optionalToken(TokenType.VAR_PROPERTY, /^\.[\s]*/, () => parseVarValueAdditional(tkzr));
     parseResult.elseThrow("Unknown value");
 }
 
@@ -147,7 +147,7 @@ function tokenizeOperatorOrInstructionBreak(tkzr) {
 
     return tkzr
         .optionalToken(TokenType.SINGLE_OPERATOR, /^[\+\-\*\/%<>][\s]*/)
-        .elseOptionalToken(TokenType.DOUBLE_OPERATOR, /^(==|&&|\|\||!=|<=|>=)[\s]*/)
+        .elseOptionalToken(TokenType.MULTI_OPERATOR, /^(==|&&|\|\||!=|<=|>=|or|and)[\s]*/)
         .elseOptionalToken(TokenType.INSTANCEOF, /^instanceof\s*/)
         .didConsume();
 }
@@ -157,6 +157,8 @@ function tokenizeValue(tkzr) {
         tokenizeString(tkzr);
     else
         tokenizeNonStringValueOrThrow(tkzr);
+    
+    parseVarValueAdditional(tkzr)
 
     tkzr.optionalToken(TokenType.INLINE_IF_TRUE, /^\?\s*/, () => {
             tkzr.in()
@@ -180,7 +182,7 @@ function tokenizeInstruction(tkzr) {
             while (true) {
                 tkzr.optionalToken(TokenType.CLASS_CONSTRUCTOR_PROPERTY, /^property[\s]*/);
 
-                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s*)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
+                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s+)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
                 if (isTypeAnnotated) {
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_TYPE, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
@@ -212,7 +214,7 @@ function tokenizeInstruction(tkzr) {
 
         if (!tkzr.test(/^\)/))
             while (true) {
-                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s*)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
+                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s+)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
                 if (isTypeAnnotated) {
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_TYPE, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);

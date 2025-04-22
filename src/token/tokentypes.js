@@ -69,7 +69,8 @@ export const TokenType = {
     VALUE_CLOSE_BRACKETS: nextEnum(),
 
     SINGLE_OPERATOR: nextEnum(),
-    DOUBLE_OPERATOR: nextEnum(),
+    MULTI_OPERATOR: nextEnum(),
+    NOT: nextEnum(),
     NEGATIVE: nextEnum(),
     TYPEOF: nextEnum(),
     INSTANCEOF: nextEnum(),

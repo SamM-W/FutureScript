@@ -24,7 +24,7 @@ trait Bar {
 
     apply canAccessStorefront(string genericArgument) {
         console.log(this.barTrait); // -> "hello from bar"
-        return genericArgument == 2 || next; //next means to get the value of the method being overriden
+        return genericArgument == 2 || next; //next means to get the value of the method being overriden, or null if there is no previous
     }
 
     apply procedure logAll() { //Applied WITH the base function, there is no override

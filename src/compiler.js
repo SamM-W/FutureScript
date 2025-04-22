@@ -7,7 +7,7 @@ import { getReviewOfCode } from "./review/generator.js";
 
 const compiledResultHeader =
 `//Compiled by the compiler which compiled this file
-import { validateIsOf } from "file://C:\\\\Gists\\\\EPQ-FutureProgrammingLanguages\\\\NewLang\\\\usage\\\\pjs-lib\\\\Types.js";`;
+import { range, log, validateIsOf } from "file://C:\\\\Gists\\\\EPQ-FutureProgrammingLanguages\\\\NewLang\\\\usage\\\\pjs-lib\\\\Implementations.js";`;
 
 function compileTokens(tokens) {
     var result = [];

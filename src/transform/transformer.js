@@ -22,13 +22,24 @@ export function applySimpleTransformToToken(token) {
     if (token.type == TokenType.INSTRUCTION_BREAK) {
         token.content = ";"
     }
+
+    if (token.type == TokenType.MULTI_OPERATOR) {
+        if (token.content == "and") {
+            token.content = "&&";
+        } else if (token.content == "or") {
+            token.content = "||";
+        }
+    }
+    if (token.type == TokenType.NOT) {
+        token.content = "!";
+    }
+
     if (token.type == TokenType.VAR_DEF) {
         var defaultKeywords = ["var", "let", "const"];
         if (defaultKeywords.indexOf(token.content) != -1) {
             return;
         }
         token.inner[2].inner = [createValidationFunctionCall(token.content, token.inner[2].inner)];
-        console.log(token.toString());
         token.content = "var";
     }
     if (token.type == TokenType.FUNCTION_DEFINITION) {

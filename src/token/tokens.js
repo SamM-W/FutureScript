@@ -153,9 +153,6 @@ export class TokensBuilder {
         if (result != null) {
             this.addToken(tokenType, result[0]);
             return this;
-        }    
-        for (var token of this.tokens) {
-            console.log(token.toString() + '\n');
         }
         throw "Expected token '" + (this.remainingText.length > 20 ? this.remainingText.substring(0, 20) : this.remainingText) + "' " + TokenNames[tokenType];
     }
