@@ -12,9 +12,9 @@ if "%command%" == "exit" (
     cls
     exit /b 0
 )
-if /i "%command%"=="r" (
+if /i "%command%"=="q" (
     cls
-    set "command=call ./car ./usage/src/syntaxv4-Finalizing/demoscript.pfs ./usage/build/math.js -noreview"
+    set "command=call ./car ./usage/src/syntaxv4-Finalizing/demoscript.pfs -noreview"
 ) else (
     set "command=call %command%"
 )

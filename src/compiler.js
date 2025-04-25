@@ -31,9 +31,9 @@ export async function compile(inFileName, outFileName, compilerInfo, term, hasOu
     }
 
     var tokenized = tokenize(inText);
-    if (hasOutput) term.grey("| ").white("📖 Parsed file ").green("successfully\n");
+    if (hasOutput) term.grey("| ").grey("📖 Parsed file successfully (").bold(true).blue(tokenized.tokenCount + " tokens").bold(false).grey(")\n");
 
-    var out = compiledResultHeader + compileTokens(tokenized).join(" ");
+    var out = compiledResultHeader + compileTokens(tokenized.tokens).join(" ");
     fs.mkdirSync(path.dirname(outFileName), { recursive: true });
     fs.writeFileSync(outFileName, out);
 

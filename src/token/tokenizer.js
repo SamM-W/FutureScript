@@ -403,5 +403,5 @@ export function tokenize(text) {
         }
         i++;
     }
-    return tkzr.tokens;
+    return tkzr;
 }

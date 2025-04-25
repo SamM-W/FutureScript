@@ -31,6 +31,7 @@ export class TokensBuilder {
         this.tokens = [];
         this.tokenNestStack = [];
         this.context = {};
+        this.tokenCount = 0;
     }
 
     addTokenContextFlag(context) {
@@ -70,6 +71,7 @@ export class TokensBuilder {
         var newToken = new Token(tokenType, content);
         if (this.tokenNestStack.length == 0) {
             this.tokens.push(newToken);
+            this.tokenCount++;
         } else {
             this.tokenNestStack[this.tokenNestStack.length-1].addInner(newToken);
         }
@@ -121,10 +123,6 @@ export class TokensBuilder {
             elseOptionalDirectFlaggedToken: (flagType, tokenType, regex, handler) =>
                 {return this.optionalDirectFlaggedToken(flagType, tokenType, regex, handler);},
             elseThrow: (err) => {
-                for (var token of this.tokens) {
-                    console.log(token.toString() + '\n');
-                }
-            
                 throw err + " in '" + (this.remainingText.length > 20 ? this.remainingText.substring(0, 20) : this.remainingText) + "'";
             },
             didConsume: ()=>{return false;}

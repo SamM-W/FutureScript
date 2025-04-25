@@ -1,3 +1,5 @@
 {
-    "javascript.validate.enable": false
+    "javascript.validate.enable": false,
+    "javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+    "javascript.inlayHints.parameterNames.enabled": "all"
 }
