@@ -74,6 +74,7 @@ export class TokensBuilder {
             this.tokenCount++;
         } else {
             this.tokenNestStack[this.tokenNestStack.length-1].addInner(newToken);
+            this.tokenCount++;
         }
         return newToken;
     }

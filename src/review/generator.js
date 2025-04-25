@@ -59,8 +59,5 @@ export async function getReviewOfCode(code) {
   }
 
   var result = completion.choices[0].message.content;
-  // console.log(result);
-  // result = result.replace(/```json|```/g, "");
-
   return JSON.parse(result);
 }

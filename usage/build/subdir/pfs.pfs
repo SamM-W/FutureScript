@@ -1,2 +1,0 @@
-//Compiled by the compiler which compiled this file
-import { range, log, validateIsOf } from "file://C:\\Gists\\EPQ-FutureProgrammingLanguages\\NewLang\\usage\\pjs-lib\\Implementations.js";var x =  0 ;
