@@ -18,6 +18,10 @@ function createValidationFunctionCall(typeToken, wrapped) {
     return functionCallVarValue;
 }
 
+function setFirstUpper(name) {
+    return name.substr(0, 1).toUpperCase() + name.substr(1)
+}
+
 export function applySimpleTransformToToken(token) {
     if (token.type == TokenType.INSTRUCTION_BREAK) {
         token.content = ";"
@@ -62,6 +66,13 @@ export function applySimpleTransformToToken(token) {
 
         token.inner[2].inner.unshift(new Token(TokenType.CODE_INJECT, 
             properties.map((propertyName) => `this.${propertyName} = ${propertyName};`).join("")
+        ));
+        
+        token.inner[2].inner.unshift(new Token(TokenType.CODE_INJECT, 
+            properties.map((propertyName) => `this.set${setFirstUpper(propertyName)} = (${propertyName}) => {this.${propertyName} = ${propertyName}};`).join("")
+        ));
+        token.inner[2].inner.unshift(new Token(TokenType.CODE_INJECT, 
+            properties.map((propertyName) => `this.get${setFirstUpper(propertyName)} = (${propertyName}) => this.${propertyName};`).join("")
         ));
         applyArgumentTypeChecking(token);
     }

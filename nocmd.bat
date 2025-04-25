@@ -14,7 +14,7 @@ if "%command%" == "exit" (
 )
 if /i "%command%"=="r" (
     cls
-    set "command=call ./car ./usage/src/syntaxv4-Finalizing/demoscript.pfs ./usage/build/math.js -nooutput"
+    set "command=call ./car ./usage/src/syntaxv4-Finalizing/demoscript.pfs ./usage/build/math.js -noreview"
 ) else (
     set "command=call %command%"
 )

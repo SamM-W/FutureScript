@@ -66,7 +66,7 @@ composed class User {
 }
 
 //Here is a trait that defines a set of functions that can be added to the class.
-trait AdminPermission {
+trait Admin {
     constructor(
     ) {
     }
@@ -118,7 +118,7 @@ user2.addTrait(new StorefrontOwner("storefrontId2"));
 user2.addTrait(new StorefrontOwner("storefrontId3"));
 
 User userAdmin = new User("Admin", 40);
-userAdmin.addTrait(new AdminPermission());
+userAdmin.addTrait(new Admin());
 
 log(user2.canAccessStorefront("storefrontId1")); // outputs: false
 log(user2.canAccessStorefront("storefrontId2")); // outputs: true
@@ -126,6 +126,11 @@ log(user2.canAccessStorefront("storefrontId3")); // outputs: true
 
 log(userAdmin.canAccessStorefront("storefrontId1")); // outputs: true
 log(userAdmin.canAccessStorefront("storefrontId2")); // outputs: true
+
+log(user.getName()); // outputs: John
+
+log(userAdmin.getTrait(Admin)); //Gets the instance of the admin trait
+log(user2.getTraits(StorefrontOwner)); //Gets all instances of storefront owner trait
 
 user2.logAllPermissions(); //Outputs:
 //Logging user permissions:

@@ -4,13 +4,22 @@ import { Token } from "../token/tokens.js";
 const composedClassInject = (compositionMeta) => `
 this._composure = ${JSON.stringify(compositionMeta)};
 this._traits = [];
-this.as = (traitType) => {
+this.getTrait = (traitType) => {
     for (var i = 0; i < this._traits.length; i++) {
         if (this._traits[i] instanceof traitType) {
             return this._traits[i];
         }
     }
     return null;
+};
+this.getTraits = (traitType) => {
+    var all = [];
+    for (var i = 0; i < this._traits.length; i++) {
+        if (this._traits[i] instanceof traitType) {
+            all.push(this._traits[i]);
+        }
+    }
+    return all;
 };
 this.addTrait = (trait) => {
     this._traits.push(trait);
