@@ -87,7 +87,7 @@ if (srcIsFolder) {
                 compileDir(filename);
             } else {
                 if (file.name.endsWith(".pfs")) {
-                    startCompileForFile(file.name, filename, outFileName)
+                    startCompileForFile(file.name, filename, outFileName.replace(/\.pfs$/, ".js"));
                 }
             }
         }
