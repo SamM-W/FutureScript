@@ -85,7 +85,7 @@ export const TokenType = {
     INLINE_IF_FALSE: nextEnum(),
     INLINE_NULL_CHECK: nextEnum(),
     CONSTRUCTOR_INVOKE: nextEnum(),
-    CODE_INJECT: nextEnum(), //Used by the transformer to inject code into the result
+    CODE_INJECT: nextEnum(), //Used by the transformer to inject code into the result, not a parsable token
 };
 
 export const TokenNames = {};

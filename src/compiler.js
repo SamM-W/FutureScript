@@ -48,6 +48,7 @@ export async function compile(inFileName, outFileName, compilerInfo, term, hasOu
         //     code: { type: "string" },
         //     line_number: { type: "integer" },
         // },
+        
         if (reviewResult.length == 0) {
             term.cyan("No issues found!\n\n");
         } else {
