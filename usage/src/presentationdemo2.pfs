@@ -1,0 +1,56 @@
+composed class User {
+    constructor(
+        property string name,
+        property number age
+    ) {
+    }
+
+    base canAccessStorefront(string storefrontId) {
+        return false;
+    }
+
+    base isOwnerOfStorefront(string storefrontId) {
+        return false;
+    }
+
+}
+
+trait Admin {
+    constructor() {}
+
+    apply canAccessStorefront(string storefrontId) {
+        return true;
+    }
+}
+
+trait StorefrontOwner {
+    constructor(
+        property storefrontId
+    ) {
+    }
+
+    apply canAccessStorefront(storefrontId) {
+        return this.storefrontId == storefrontId or next;
+    }
+
+    apply isOwnerOfStorefront(storefrontId) {
+        return this.storefrontId == storefrontId or next;
+    }
+}
+
+// Example usage
+
+var user = new User("John", 30);
+user.addTrait(new StorefrontOwner("storefrontId1"));
+
+// Test whether the user can access the storefronts with id 'storefrontId1' and 'storefrontId2' respectively.
+log(user.canAccessStorefront("storefrontId1")); // Outputs: true
+log(user.canAccessStorefront("storefrontId2")); // Outputs: false
+
+//Elevate John's permissions, by giving the user the admin trait.
+user.addTrait(new Admin());
+log(user.canAccessStorefront("storefrontId1")); // Outputs: true
+log(user.canAccessStorefront("storefrontId2")); // Outputs: true
+
+log(user.isOwnerOfStorefront("storefrontId1")); // Outputs:true
+log(user.isOwnerOfStorefront("storefrontId2")); // Outputs: false
