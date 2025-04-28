@@ -83,9 +83,11 @@ export function tokenizeNonStringValueOrThrow(tkzr) {
     tkzr.optionalToken(TokenType.NEGATIVE, /^\-[\s]*/);
     tkzr.optionalToken(TokenType.TYPEOF, /^typeof[\s]*/);
     tkzr.optionalToken(TokenType.OBJECT_EXPANSION, /^\.\.\.[\s]*/);
-    tkzr.optionalToken(TokenType.CONSTRUCTOR_INVOKE, /^new[\s]*/);
+    tkzr.optionalToken(TokenType.CONSTRUCTOR_INVOKE, /^new[\s]+/);
     var parseResult = tkzr
-        .optionalToken(TokenType.LITERAL_NUMBER, /^[0-9.]+[\s]*/)
+        .optionalToken(TokenType.LITERAL_NUMBER, /^0x[0-9A-Fa-f]+[\s]*/)
+        .elseOptionalToken(TokenType.LITERAL_NUMBER, /^0b[01]+[\s]*/)
+        .elseOptionalToken(TokenType.LITERAL_NUMBER, /^[0-9.]+[\s]*/)
         .elseOptionalToken(TokenType.LAMBDA_FUNCTION_HEADER, /^\s*\((\s*[_0-9a-zA-Z]+\s*)?(\s*,\s*[_0-9a-zA-Z]+\s*)*\)\s*=>\s*/, () => {
             tkzr.optionalToken(TokenType.OPEN_CODE_BLOCK, /^\{[\s]*/, () => {
                 tkzr.in()
@@ -120,19 +122,20 @@ export function tokenizeNonStringValueOrThrow(tkzr) {
                 });
             tkzr.out();
         })
-        .elseOptionalToken(TokenType.MAP_OPEN_BRACKETS, /^\{[\s]*/, () => {
+        .elseOptionalToken(TokenType.MAP_OPEN_BRACKETS, /^\{\s*/, () => {
             tkzr.in()
-            tkzr.optionalToken(TokenType.MAP_CLOSE_BRACKETS, /^\}[\s]*/)
+            tkzr.optionalToken(TokenType.MAP_CLOSE_BRACKETS, /^\}\s*/)
                 .else(() => {
                     while (true) {
+                        if (tkzr.optionalToken(TokenType.MAP_CLOSE_BRACKETS, /^\}\s*/).didConsume()) return;
                         tkzr.token(TokenType.MAP_ENTRY_TOKEN, /^[_0-9a-zA-Z]+\s*/)
                             .optionalToken(TokenType.MAP_ASSIGNMENT, /^:\s*/, () => {
                                 tokenizeValue(tkzr);
                             })
-                        if (!tkzr.optionalToken(TokenType.MAP_NEXT_VALUE, /^,/).didConsume())
+                        if (!tkzr.optionalToken(TokenType.MAP_NEXT_VALUE, /^,\s*/).didConsume())
                             break;
                     }
-                    tkzr.token(TokenType.MAP_CLOSE_BRACKETS, /^\}[\s]*/)
+                    tkzr.token(TokenType.MAP_CLOSE_BRACKETS, /^\}\s*/)
                 });
             tkzr.out();
         })
@@ -145,8 +148,8 @@ export function tokenizeOperatorOrInstructionBreak(tkzr) {
     }
 
     return tkzr
-        .optionalToken(TokenType.SINGLE_OPERATOR, /^[\+\-\*\/%<>][\s]*/)
-        .elseOptionalToken(TokenType.MULTI_OPERATOR, /^(==|&&|\|\||!=|<=|>=|or|and)[\s]*/)
+        .optionalToken(TokenType.MULTI_OPERATOR, /^(==|&&|\|\||!=|<=|>=|or|and)[\s]*/)
+        .elseOptionalToken(TokenType.SINGLE_OPERATOR, /^[|^&\+\-\*\/%<>][\s]*/)
         .elseOptionalToken(TokenType.INSTANCEOF, /^instanceof\s*/)
         .didConsume();
 }

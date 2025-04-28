@@ -38,6 +38,7 @@ this.addTrait = (trait) => {
             }
         }
     }
+    trait.onCompose?.(this);
 };`.replaceAll(/\s+/g, " ").trim();
 
 export function applyCompositionTransformToToken(token) {

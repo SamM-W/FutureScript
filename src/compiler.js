@@ -5,9 +5,7 @@ import { TokenType } from "./token/tokentypes.js";
 import { applySimpleTransformToToken } from "./transform/transformer.js";
 import { getReviewOfCode } from "./review/generator.js";
 
-const compiledResultHeader =
-`//Compiled by the compiler which compiled this file
-import { range, log, validateIsOf } from "file://C:\\\\Gists\\\\EPQ-FutureProgrammingLanguages\\\\NewLang\\\\usage\\\\pjs-lib\\\\Implementations.js";`;
+var compiledResultHeader;
 
 function compileTokens(tokens) {
     var result = [];
@@ -22,6 +20,10 @@ function compileTokens(tokens) {
 }
 
 export async function compile(inFileName, outFileName, compilerInfo, term, hasOutput, hasReview) {
+    compiledResultHeader =
+`//Compiled by the FutureScript compiler (${compilerInfo.version})
+import { range, log, validateIsOf } from "file://C:\\\\Gists\\\\EPQ-FutureProgrammingLanguages\\\\NewLang\\\\library\\\\Implementations.js";\n`;
+
     var inText = fs.readFileSync(inFileName).toString();
 
     var reviewResult = null;
@@ -48,7 +50,7 @@ export async function compile(inFileName, outFileName, compilerInfo, term, hasOu
         //     code: { type: "string" },
         //     line_number: { type: "integer" },
         // },
-        
+
         if (reviewResult.length == 0) {
             term.cyan("No issues found!\n\n");
         } else {

@@ -1,0 +1,41 @@
+const PERMISSIONS = {
+    READ: 1,
+    WRITE: 2,
+    DELETE: 4,
+    EXECUTE: 8,
+    ADMIN: 16,
+}
+
+trait Administrator {
+    constructor(
+        property permissionsLevel
+    ) {}
+}
+
+trait RootAdministrator {
+    constructor(
+    ) {}
+
+    onCompose(composedClass) {
+        composedClass.addTrait(new Administrator(0xFFFFF));
+    }
+}
+
+composed class User {
+    constructor(
+        property string name,
+        property number age
+    ) {
+    }
+}
+
+User newUser = new User("John Doe", 25);
+newUser.addTrait(new Administrator(PERMISSIONS.READ | PERMISSIONS.WRITE));
+
+User root = new User("Root", 30);
+root.addTrait(new RootAdministrator());
+
+console.log(`Composition of: ${newUser.getName()}`); // outputs: John Doe + ...
+console.log(newUser._traits)
+console.log(`Composition of: ${root.getName()}`); // outputs: Root + ...
+console.log(root._traits)
