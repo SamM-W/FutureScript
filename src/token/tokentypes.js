@@ -25,6 +25,8 @@ export const TokenType = {
     FUNCTION_DEFINITION: nextEnum(),
     CONSTRUCTOR_FUNCTION_DEFINITION: nextEnum(),
 
+    CONTINUE: nextEnum(),
+    BREAK: nextEnum(),
     THROW: nextEnum(),
     
     LAMBDA_FUNCTION_HEADER: nextEnum(),

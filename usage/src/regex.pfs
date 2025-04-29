@@ -1,0 +1,76 @@
+var regex = "abc?[12]";
+
+class StringReader {
+    constructor(
+        property input
+    ) {}
+
+    peek() {
+        return this.input.substring(0, 1);
+    }
+
+    consume() {
+        this.input = this.input.substring(1);
+    }
+
+    isEmpty() {
+        return this.input.length !== 0;
+    }
+}
+
+composed class Token {
+    constructor() {}
+
+    base consume(reader) {
+        return this.testToken(reader) !== null;
+    }
+
+    testToken(reader) {
+        return null;
+    }
+}
+
+composed class CharToken extends Token {
+    constructor(property string char) {}
+    testToken(reader) {
+        var peek = reader.peek();
+        if (peek === char) {
+            reader.consume();
+            return peek;
+        }
+    }
+}
+
+function testPseudoRegex(regex, string) {
+    var reader = new StringReader(regex, string);
+
+    function readToken() {
+        var peek = reader.peek();
+
+
+        //Reading char
+        return new CharToken(peek);
+    }
+
+    while (!reader.isEmpty()) {
+        readToken();
+    }
+
+    console.log(tokens);
+    return []
+}
+
+//TEST
+
+function assertTestEq(regex, test, expect) {
+    var result = testPseudoRegex(regex, test);
+    if (result !== expect) {
+        throw `Test failed, expected ${expect} but got ${result}, for /${regex}/, testing against ${test}`;
+    }
+}
+
+assertTestEq(regex, "ab1", true);
+assertTestEq(regex, "abc2", true);
+assertTestEq(regex, "gbc1", false);
+assertTestEq(regex, "abc11", true);
+assertTestEq(regex, "abca1", false);

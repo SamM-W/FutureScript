@@ -148,7 +148,7 @@ export function tokenizeOperatorOrInstructionBreak(tkzr) {
     }
 
     return tkzr
-        .optionalToken(TokenType.MULTI_OPERATOR, /^(==|&&|\|\||!=|<=|>=|or|and)[\s]*/)
+        .optionalToken(TokenType.MULTI_OPERATOR, /^(!==|===|==|&&|\|\||!=|<=|>=|or|and)[\s]*/)
         .elseOptionalToken(TokenType.SINGLE_OPERATOR, /^[|^&\+\-\*\/%<>][\s]*/)
         .elseOptionalToken(TokenType.INSTANCEOF, /^instanceof\s*/)
         .didConsume();

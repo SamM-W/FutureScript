@@ -4,7 +4,7 @@ import { FlagType, TokenType } from "./tokentypes.js";
 
 const INSTRUCTION_BREAK_MATCH = /^[;\n\r]+[\s]*/;
 
-function tokenizeInstruction(tkzr) {
+function tokenizeInstruction(tkzr, forceBreak = true) {
     function tokenizeConstructorFunctionBody() {
         tkzr.in()
             .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
@@ -14,7 +14,7 @@ function tokenizeInstruction(tkzr) {
             while (true) {
                 tkzr.optionalToken(TokenType.CLASS_CONSTRUCTOR_PROPERTY, /^property[\s]*/);
 
-                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*\s+)([a-zA-Z][_a-zA-Z0-9$]*\s*)(,|\))/);
+                var isTypeAnnotated = tkzr.test(/^([a-zA-Z][_a-zA-Z0-9$]*)(\s+[a-zA-Z][_a-zA-Z0-9$]*)\s*(,|\))/);
                 if (isTypeAnnotated) {
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_TYPE, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
                     tkzr.token(TokenType.FUNCTION_ARGUMENT_NAME, /^[a-zA-Z][_a-zA-Z0-9$]*[\s]*/);
@@ -141,7 +141,7 @@ function tokenizeInstruction(tkzr) {
                 tokenizeInstruction(tkzr);
                 tokenizeValue(tkzr);
                 tkzr.token(TokenType.INSTRUCTION_BREAK, /^;\s*/)
-                tokenizeInstruction(tkzr);
+                tokenizeInstruction(tkzr, false);
             }
             tkzr.token(TokenType.CONTROL_BLOCK_CLOSE_BRACKETS, /^\)\s*/)
                 .out();
@@ -149,11 +149,14 @@ function tokenizeInstruction(tkzr) {
             tkzr.out();
         })
 
+        .elseOptionalToken(TokenType.BREAK, /^break[\s]*/)
+        .elseOptionalToken(TokenType.CONTINUE, /^continue[\s]*/)
         .elseOptionalToken(TokenType.THROW, /^throw[\s]*/, () => {
             tkzr.in()
             tokenizeValue(tkzr);
             tkzr.out()
         })
+
         //Function definitions
         .elseOptionalFlaggedToken(FlagType.IN_FUNCTION_DEFINITION, TokenType.FUNCTION_RETURN, /^return[\s]*/, () => {
             tkzr.in()
@@ -163,27 +166,27 @@ function tokenizeInstruction(tkzr) {
             tkzr.out()
         })
 
-        .elseOptionalToken(TokenType.FUNCTION_DEFINITION, /^(async)?[\s]*function[\s]+[_a-zA-Z0-9$]*[\s]*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalToken(TokenType.FUNCTION_DEFINITION, /^(async)?[\s]*function[\s]+[_a-zA-Z0-9$]+[\s]*(?=\()/, tokenizeFunctionBody)
         
-        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor*\s*(?=\()/, tokenizeConstructorFunctionBody)
-        .elseOptionalDirectFlaggedToken(FlagType.IN_TRAIT_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor*\s*(?=\()/, tokenizeConstructorFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor\s*(?=\()/, tokenizeConstructorFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor\s*(?=\()/, tokenizeConstructorFunctionBody)
         .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.CONSTRUCTOR_FUNCTION_DEFINITION, /^constructor\s*(?=\()/, tokenizeConstructorFunctionBody)
 
-        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((base)\s+(procedure\s+)?)?[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
-        .elseOptionalDirectFlaggedToken(FlagType.IN_TRAIT_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((apply)\s+(procedure\s+)?)?[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
-        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s)?\s*[_a-zA-Z0-9$]*\s*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_COMPOSED_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((base)\s+(procedure\s+)?)?[_a-zA-Z0-9$]+\s*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_TRAIT_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s+)?((apply)\s+(procedure\s+)?)?[_a-zA-Z0-9$]+\s*(?=\()/, tokenizeFunctionBody)
+        .elseOptionalDirectFlaggedToken(FlagType.IN_CLASS_DEFINITION, TokenType.FUNCTION_DEFINITION, /^(async\s)?\s*[_a-zA-Z0-9$]+\s*(?=\()/, tokenizeFunctionBody)
 
 
         //Class definition
-        .elseOptionalToken(TokenType.CLASS_DEFINITION, /^(export\s+)?(((composed\s+)?class)|trait)\s+[_a-zA-Z0-9$]*[\s]*{/, (token) => {
+        .elseOptionalToken(TokenType.CLASS_DEFINITION, /^(export\s+)?(((composed\s+)?class)|trait)\s+[_a-zA-Z0-9$]+[\s]*(extends\s+[_a-zA-Z0-9$]+\s*)?{\s*/, (token) => {
             var isComposed = /^(export\s*)?(composed\s+)/.test(token.content);
-            var isTrait = /^(export)?[\s]*(trait\s+)/.test(token.content);
+            var isTrait = /^(export)?(trait\s+)/.test(token.content);
             tkzr.in()
             if (isComposed) tkzr.addTokenContextFlag(FlagType.IN_COMPOSED_CLASS_DEFINITION);
             else if (isTrait) tkzr.addTokenContextFlag(FlagType.IN_TRAIT_DEFINITION);
             else tkzr.addTokenContextFlag(FlagType.IN_CLASS_DEFINITION);
 
-            while (!tkzr.test(/^\}[\s]*/)) {
+            while (!tkzr.test(/^\}\s*/)) {
                 tokenizeInstruction(tkzr);
             }
 
@@ -215,7 +218,7 @@ function tokenizeInstruction(tkzr) {
         .elseThrow("Unknown identifier of instruction");
 
     tkzr.optionalToken(TokenType.INSTRUCTION_BREAK, INSTRUCTION_BREAK_MATCH).else(() => {
-        tkzr.metaToken(TokenType.INSTRUCTION_BREAK)
+        if (forceBreak) tkzr.metaToken(TokenType.INSTRUCTION_BREAK)
     });
 }
 
@@ -230,10 +233,11 @@ export function tokenize(text) {
         var startTokensLength = tkzr.tokens.length;
         tokenizeInstruction(tkzr);
         if (tkzr.tokens.length == startTokensLength) {
-            console.log("Got stuck :( '" + tkzr.remainingText + "'");
+            console.error("Fatal error: Got stuck :( '" + tkzr.remainingText + "'");
             break;
         }
         i++;
     }
+ 
     return tkzr;
 }

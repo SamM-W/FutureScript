@@ -36,6 +36,6 @@ User root = new User("Root", 30);
 root.addTrait(new RootAdministrator());
 
 console.log(`Composition of: ${newUser.getName()}`); // outputs: John Doe + ...
-console.log(newUser._traits)
+console.log(newUser._traits);
 console.log(`Composition of: ${root.getName()}`); // outputs: Root + ...
-console.log(root._traits)
+console.log(root._traits);

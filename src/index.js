@@ -28,19 +28,17 @@ function startCompileForFile(inFileName, filePath, outPath) {
 }
 
 function finishedWithError(err) {
-    term.grey("⎳ ")
     term.red("Failed compile in " + (Date.now() - startTime) + "ms\n");
     term.red("Error:\n");
 
     console.error(err);
-    process.exit(-1);
 }
 
 function checkForFinished() {
     if (Object.keys(activeCompileTasks).length == 0) {
         if (!hasOutput) return;
         term.grey("⎳ ");
-        term.green("🎉 Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");
+        term.green("Finished compile in ").bold.blue((Date.now() - startTime)).green(" ms\n");
     }
 }
 
@@ -93,4 +91,7 @@ if (srcIsFolder) {
         }
     }
     compileDir(srcFileLocation);
-} else {}
+} else {
+    var name = path.basename(srcFileLocation);
+    startCompileForFile(name, srcFileLocation, outFileLocation);
+}
