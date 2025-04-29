@@ -28,6 +28,10 @@ export const TokenType = {
     CONTINUE: nextEnum(),
     BREAK: nextEnum(),
     THROW: nextEnum(),
+
+    IMPORT: nextEnum(),
+    IMPORT_FROM: nextEnum(),
+    IMPORT_AS: nextEnum(),
     
     LAMBDA_FUNCTION_HEADER: nextEnum(),
 

@@ -1,0 +1,15 @@
+import fs from 'fs';
+
+// Graceful shutdown handler
+const shutdown = () => {
+    console.log("Shutting down gracefully...");
+    process.exit(0);  // Exit the process
+};
+
+setInterval(() => {
+    console.log("Server is running...");
+}, 1000); // Simulate server activity
+
+// Listen for termination signals
+process.on('SIGINT', shutdown); // Ctrl+C in terminal
+process.on('SIGTERM', shutdown); // Termination signal from system or PM2

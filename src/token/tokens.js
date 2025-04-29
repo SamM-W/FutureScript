@@ -124,7 +124,6 @@ export class TokensBuilder {
             elseOptionalDirectFlaggedToken: (flagType, tokenType, regex, handler) =>
                 {return this.optionalDirectFlaggedToken(flagType, tokenType, regex, handler);},
             elseThrow: (err) => {
-                console.log(this.tokens.toString());
                 throw err + " in '" + (this.remainingText.length > 20 ? this.remainingText.substring(0, 20) : this.remainingText) + "'";
             },
             didConsume: ()=>{return false;}

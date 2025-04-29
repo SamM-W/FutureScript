@@ -4,7 +4,7 @@ import { FlagType, TokenType } from "./tokentypes.js";
 
 const INSTRUCTION_BREAK_MATCH = /^[;\n\r]+[\s]*/;
 
-function tokenizeInstruction(tkzr, forceBreak = true) {
+export function tokenizeInstruction(tkzr, forceBreak = true) {
     function tokenizeConstructorFunctionBody() {
         tkzr.in()
             .token(TokenType.FUNCTION_OPEN_BRACKETS, /^\([\s]*/)
@@ -103,6 +103,22 @@ function tokenizeInstruction(tkzr, forceBreak = true) {
             tkzr.out()
                 .out();
         })
+
+        // Import statement
+        .elseOptionalToken(TokenType.IMPORT, /^import\s+[a-zA-Z0-9_$]+\s*/, () => {
+            tkzr.in()
+                .token(TokenType.IMPORT_FROM, /^from\s+/)
+                .in();
+            tokenizeValue(tkzr);
+            tkzr.out()
+                .optionalToken(TokenType.IMPORT_AS, /^as\s+/, () => {
+                    tkzr.in()
+                        .token(TokenType.VAR_NAME, /^[_a-zA-Z0-9$]+[\s]*/)
+                        .out()
+                });
+            tkzr.out();
+        })
+
         //Itteration and selection
         .elseOptionalToken(TokenType.CONTROL_BLOCK_IF, /^if\s*(?=\()/, () => {
             tkzr.in()

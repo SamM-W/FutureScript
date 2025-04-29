@@ -1,3 +1,4 @@
+import { tokenizeInstruction } from "./tokenizer.js";
 import { FlagType, TokenType } from "./tokentypes.js";
 
 const INSTRUCTION_BREAK_MATCH = /^[;\n\r]+[\s]*/;

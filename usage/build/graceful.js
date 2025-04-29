@@ -1,0 +1,3 @@
+//Compiled by the FutureScript compiler (v2.1.6)
+import { range, log, validateIsOf } from "file://C:\\Gists\\EPQ-FutureProgrammingLanguages\\NewLang\\library\\Implementations.js";
+import fs from 'fs' ; const shutdown =  () => { console . log ( "Shutting down gracefully..." ) ; process . exit ( 0 ) ; } ; setInterval ( () => { console . log ( "Server is running..." ) ; } , 1000 ) ; process . on ( 'SIGINT' , shutdown ) ; process . on ( 'SIGTERM' , shutdown ) ;
